@@ -7,31 +7,20 @@ class Block {
     this.data = data;
     this.previousHash = previousHash;
     this.hash = this.calculateHash();
-    this.nonce = 0;
   }
 
   calculateHash() {
-    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
-  }
-
-  maineBlock(difficulty) {
-    while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
-      this.nonce++;
-      this.hash = this.calculateHash();
-    }
-
-    console.log('Block mined: ' + this.hash);
+    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
   }
 }
 
 class Blockchain {
   constructor() {
     this.chain = [this.createGenesisBlock()];
-    this.difficulty = 4;
   }
 
   createGenesisBlock() {
-    return new Block(0, '01/01/2021', { name: 'Genesis block', owner: 'Me' }, null)
+    return new Block(0, '01/01/2021', 'Genesis block', "0")
   }
 
   getLatestBlock() {
@@ -40,8 +29,7 @@ class Blockchain {
 
   addBlock(newBlock) {
     newBlock.previousHash = this.getLatestBlock().hash;
-    // newBlock.hash = newBlock.calculateHash();
-    newBlock.maineBlock(this.difficulty);
+    newBlock.hash = newBlock.calculateHash();
     this.chain.push(newBlock);
   }
 
@@ -50,10 +38,12 @@ class Blockchain {
       const currentBlock = this.chain[index];
       const previousBlock = this.chain[index - 1];
 
+      // Check if the hash is valid
       if (currentBlock.hash !== currentBlock.calculateHash()) {
         return false;
       }
 
+      // Check if previous hash is correct
       if (currentBlock.previousHash !== previousBlock.hash) {
         return false;
       }
@@ -65,20 +55,15 @@ class Blockchain {
 
 let birhanuCoin = new Blockchain();
 
-console.log('Mining block 1...');
 birhanuCoin.addBlock(new Block(1, '02/01/2021', { amount: 4 }));
-
-console.log('Mining block 2 ...');
 birhanuCoin.addBlock(new Block(2, '02/01/2021', { amount: 10 }));
 
-/**
-// console.log(JSON.stringify('Print blockchain', birhanuCoin, null, 4));
-
-console.log('Is blockchain valid', birhanuCoin.isChainValid());
+console.log('Is blockchain valid?', birhanuCoin.isChainValid());
 
 // Tampering the block
 birhanuCoin.chain[1].data = { amount: 100 }; // Change data
 birhanuCoin.chain[1].hash = birhanuCoin.chain[1].calculateHash(); // Recalculate hash
 
-console.log('Is blockchain valid', birhanuCoin.isChainValid());
-*/
+console.log('Is blockchain valid?', birhanuCoin.isChainValid());
+
+// console.log(JSON.stringify(birhanuCoin, null, 4));
