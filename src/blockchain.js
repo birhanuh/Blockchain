@@ -1,10 +1,37 @@
 const SHA256 = require('crypto-js/sha256')
+const EC = require('elliptic').ec;
+const ec = new EC('secp256k1');
 
 class Transaction {
   constructor(fromAddress, toAddress, amount) {
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
     this.amount = amount;
+  }
+
+  calculateHash() {
+    return SHA256(this.fromAddress + this.toAddress + this.amount).toString();
+  }
+
+  signTransaction(signingKey) {
+    if (signingkey.getPubic('hex') !== this.fromAddress) {
+      throw new Error('You cannot sign transactions for other wallets!');
+    }
+
+    const hashTx = this.calculateHash();
+    const sig = signingKey.sign(hashTx, 'base64');
+    this.signature = sig.toDER('hex');
+  }
+
+  isValid() {
+    if (this.fromAddress === null) return true;
+
+    if (!this.signature || this.signature.length === 0) {
+      throw new Error('No signature in this transaction!');
+    }
+
+    const publicKey = ec.keyFromPublic(this.fromAddress, 'hex');
+    return publicKey.verify(this.calculateHash(), this.signature);
   }
 }
 
@@ -29,6 +56,16 @@ class Block {
     }
 
     console.log('Block mined: ' + this.hash);
+  }
+
+  hasValidTransactions() {
+    for (const tx of this.transactions) {
+      if (!tx.isValid()) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 
@@ -61,7 +98,15 @@ class Blockchain {
     this.pendingTransactions = [new Transaction(null, miningRewardAddress, this.miningReward)];
   }
 
-  createTransaction(transaction) {
+  addTransaction(transaction) {
+    if (!transaction.fromAddress || !transaction.toAddress) {
+      throw new Error('Transaction must include from and to address');
+    }
+
+    if (!transaction.isValid()) {
+      throw new Error('Cannot add invalid transaction to chain');
+    }
+
     this.pendingTransactions.push(transaction);
   }
 
@@ -88,6 +133,10 @@ class Blockchain {
       const currentBlock = this.chain[index];
       const previousBlock = this.chain[index - 1];
 
+      if (!currentBlock.hasValidTransactions()) {
+        return false;
+      }
+
       if (currentBlock.hash !== currentBlock.calculateHash()) {
         return false;
       }
@@ -101,35 +150,5 @@ class Blockchain {
   }
 }
 
-let birhanuCoin = new Blockchain();
-
-birhanuCoin.createTransaction(new Transaction('address1', 'address2', 100));  // In reality address1 and address2 will be the public key of someone's wallet
-birhanuCoin.createTransaction(new Transaction('address2', 'address1', 50));
-
-console.log('\n Starting the miner...');
-birhanuCoin.minePendingTransactions('birhams-address');
-console.log('\n Blance of birham is', birhanuCoin.getBalanceOfAddress('birhams-address'));
-
-console.log('\n Starting the miner again...');
-birhanuCoin.minePendingTransactions('birhams-address');
-console.log('\n Blance of birham is', birhanuCoin.getBalanceOfAddress('birhams-address'));
-
-/**
-console.log('Mining block 1...');
-birhanuCoin.addBlock(new Block(1, '02/01/2021', { amount: 4 }));
-
-console.log('Mining block 2 ...');
-birhanuCoin.addBlock(new Block(2, '02/01/2021', { amount: 10 }));
-*/
-
-/**
-// console.log(JSON.stringify('Print blockchain', birhanuCoin, null, 4));
-
-console.log('Is blockchain valid', birhanuCoin.isChainValid());
-
-// Tampering the block
-birhanuCoin.chain[1].data = { amount: 100 }; // Change data
-birhanuCoin.chain[1].hash = birhanuCoin.chain[1].calculateHash(); // Recalculate hash
-
-console.log('Is blockchain valid', birhanuCoin.isChainValid());
-*/
+module.exports.Blockchain = Blockchain;
+module.exports.Transaction = Transaction;
