@@ -18,7 +18,7 @@ class Block {
   }
 
   calculateHash() {
-    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
+    return SHA256(this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
   }
 
   maineBlock(difficulty) {
@@ -49,12 +49,15 @@ class Blockchain {
   }
 
   minePendingTransactions(miningRewardAddress) {
-    let block = new Block(Date.now(), this.pendingTransactions)
+    let block = new Block(Date.now(), this.pendingTransactions) // Here we add all the pending transaction but, in real world such as Bitcoin cos there are way to 
+    // many transactions miners get to choose whcih transactions to include and which to not. Cos the size of a block can not exceed more than 1MB
+
     block.maineBlock(this.difficulty);
 
     console.log('Block successfully mined!');
     this.chain.push(block);
 
+    // Reset transactions and give miner its reward
     this.pendingTransactions = [new Transaction(null, miningRewardAddress, this.miningReward)];
   }
 
@@ -66,7 +69,6 @@ class Blockchain {
     let balance = 0;
 
     for (const block of this.chain) {
-      console.log('k. ', block)
       for (const trans of block.transactions) {
         if (trans.fromAddress === address) {
           balance -= trans.amount;
@@ -101,7 +103,7 @@ class Blockchain {
 
 let birhanuCoin = new Blockchain();
 
-birhanuCoin.createTransaction(new Transaction('address1', 'address2', 100));
+birhanuCoin.createTransaction(new Transaction('address1', 'address2', 100));  // In reality address1 and address2 will be the public key of someone's wallet
 birhanuCoin.createTransaction(new Transaction('address2', 'address1', 50));
 
 console.log('\n Starting the miner...');
