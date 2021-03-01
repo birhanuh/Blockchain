@@ -22,6 +22,7 @@ class Block {
   }
 
   maineBlock(difficulty) {
+    // A quick trick to make a string of zeros that's exaclty the length of difficulty 
     while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
       this.nonce++;
       this.hash = this.calculateHash();
