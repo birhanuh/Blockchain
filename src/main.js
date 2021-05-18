@@ -4,32 +4,50 @@ const ec = new EC('secp256k1');
 
 const secrets = require('../secrets.json');
 
-// Initialize key
+// Your private key goes here
 const myKey = ec.keyFromPrivate(secrets.private_key);
+
+// From that we can calculate your public key (which doubles as your wallet address)
 const myWalletAddress = myKey.getPublic('hex');
 
-let birhanuCoin = new Blockchain();
+// Create new instance of Blockchain class
+const birhanuCoin = new Blockchain();
 
-const tx1 = new Transaction(myWalletAddress, 'public key goes here', 10)
-console.log('X : ', tx1.signTransaction(myKey));
+// Mine first block
+birhanuCoin.minePendingTransactions(myWalletAddress);
+
+// Create a transaction & sign it with your key
+const tx1 = new Transaction(myWalletAddress, 'address2', 100);
 tx1.signTransaction(myKey);
 birhanuCoin.addTransaction(tx1);
 
-// birhanuCoin.createTransaction(new Transaction('address1', 'address2', 100));
-// birhanuCoin.createTransaction(new Transaction('address2', 'address1', 50));
-
-console.log('\n Starting the miner...');
+// Mine block
+console.log('Starting the miner...');
 birhanuCoin.minePendingTransactions(myWalletAddress);
-console.log('\n Blance of birham is', birhanuCoin.getBalanceOfAddress(myWalletAddress));
 
-// Tamper a transaction
+console.log(`Balance of birhanu is ${birhanuCoin.getBalanceOfAddress(myWalletAddress)} \n`);
+
+// Create second transaction
+const tx2 = new Transaction(myWalletAddress, 'address1', 50);
+tx2.signTransaction(myKey);
+birhanuCoin.addTransaction(tx2);
+
+// Mine block
+console.log('Starting the miner...');
+birhanuCoin.minePendingTransactions(myWalletAddress);
+
+console.log(`Balance of birhanu is ${birhanuCoin.getBalanceOfAddress(myWalletAddress)}`);
+
+/**
+Tamper a transaction
 birhanuCoin.chain[1].transactions[0].amount = 1;
 
 console.log('Is chain valid?', birhanuCoin.isChainValid());
 
-// console.log('\n Starting the miner again...');
-// birhanuCoin.minePendingTransactions('birhams-address');
-// console.log('\n Blance of birham is', birhanuCoin.getBalanceOfAddress('birhams-address'));
+console.log('\n Starting the miner again...');
+birhanuCoin.minePendingTransactions('birhams-address');
+console.log('\n Blance of birham is', birhanuCoin.getBalanceOfAddress('birhams-address'));
+*/
 
 /**
 console.log('Mining block 1...');
