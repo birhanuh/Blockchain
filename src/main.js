@@ -2,13 +2,16 @@ const { Blockchain, Transaction } = require('./blockchain');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
 
+const secrets = require('../secrets.json');
+
 // Initialize key
-const myKey = ec.keyFromPrivate('4406d40f6b3306555888b041c464bbffa38388e2ded3d5a11a6eec2b475dc4ad');
+const myKey = ec.keyFromPrivate(secrets.private_key);
 const myWalletAddress = myKey.getPublic('hex');
 
 let birhanuCoin = new Blockchain();
 
 const tx1 = new Transaction(myWalletAddress, 'public key goes here', 10)
+console.log('X : ', tx1.signTransaction(myKey));
 tx1.signTransaction(myKey);
 birhanuCoin.addTransaction(tx1);
 

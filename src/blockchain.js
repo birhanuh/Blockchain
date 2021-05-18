@@ -137,6 +137,7 @@ class Blockchain {
         return false;
       }
 
+      // The hash of the current block is not a representation of what it's property says
       if (currentBlock.hash !== currentBlock.calculateHash()) {
         return false;
       }
