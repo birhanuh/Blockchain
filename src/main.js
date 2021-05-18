@@ -36,18 +36,12 @@ birhanuCoin.addTransaction(tx2);
 console.log('Starting the miner...');
 birhanuCoin.minePendingTransactions(myWalletAddress);
 
-console.log(`Balance of birhanu is ${birhanuCoin.getBalanceOfAddress(myWalletAddress)}`);
+console.log(`Balance of birhanu is ${birhanuCoin.getBalanceOfAddress(myWalletAddress)} \n`);
 
-/**
-Tamper a transaction
-birhanuCoin.chain[1].transactions[0].amount = 1;
+// Tamper a transaction
+// birhanuCoin.chain[1].transactions[0].amount = 1;
 
 console.log('Is chain valid?', birhanuCoin.isChainValid());
-
-console.log('\n Starting the miner again...');
-birhanuCoin.minePendingTransactions('birhams-address');
-console.log('\n Blance of birham is', birhanuCoin.getBalanceOfAddress('birhams-address'));
-*/
 
 /**
 console.log('Mining block 1...');
